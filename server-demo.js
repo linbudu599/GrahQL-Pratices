@@ -18,7 +18,13 @@ const schema = buildSchema(`
     age: Int
     life: Life
     func(idx: Int!): [String]
-    complex(idx: Int!):Custom
+    complex(idx: Int!): Custom
+    account(username:String):Account
+  }
+  type Account {
+    name: String
+    age: Int
+    salary(city:String):Int
   }
 `);
 
@@ -50,19 +56,37 @@ const root = {
       return count === 1 ? "Yep!" : "NoNoNo~";
     };
     return { idx, people };
+  },
+  account: ({ username }) => {
+    const salary = ({ city }) => {
+      if (city !== "1") {
+        return 111;
+      } else {
+        return 222;
+      }
+    };
+
+    return {
+      name: username,
+      age: Math.floor(Math.random() * 10),
+      salary
+    };
   }
 };
 
 const app = express();
 
 app.use(
-  "/",
+  "/demo",
   graphqlHTTP({
     schema: schema,
     rootValue: root,
     graphiql: true
   })
 );
+
+app.use(express.static("public"));
+
 app.listen(4000, () => {
   console.log("http://localhost:4000");
 });
