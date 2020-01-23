@@ -1,15 +1,15 @@
-const express = require("express");
-const graphqlHTTP = require("express-graphql");
-const {
-  buildSchema,
+import express from "express";
+import graphqlHTTP from "express-graphql";
+import {
   GraphQLObjectType,
   GraphQLString,
   GraphQLInt,
   GraphQLSchema
-} = require("graphql");
+} from "graphql";
 
 const AccountType = new GraphQLObjectType({
   name: "Account",
+  description: "AccountInfo",
   fields: {
     name: {
       type: GraphQLString
@@ -20,15 +20,16 @@ const AccountType = new GraphQLObjectType({
   }
 });
 
+// 定义主干查询
 const queryType = new GraphQLObjectType({
   name: "Query",
   fields: {
     account: {
       type: AccountType,
       args: {
-        username: { type: GraphQLString }
+        username: { type: GraphQLString, defaultValue: "Budu" }
       },
-      resolve: (_, { username }) => {
+      resolve: (parentValue, { username }, request) => {
         return {
           name: username,
           age: 18
