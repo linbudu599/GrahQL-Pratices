@@ -1,19 +1,40 @@
-import mongoose from "mongoose";
-import { Schema } from "./connect";
-
+import mongoose, { Schema, Model, Document } from "mongoose";
+import connect from "./connect";
 const ObjectId = Schema.Types.ObjectId;
 
-const ListSchema = new Schema({
-  uid: Number,
-  name: String,
-  age: Number,
-  gender: String,
+// connect();
+
+interface Meta {
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface UserDoc extends Document {
+  uid: Number;
+  name: String;
+  age: Number;
+  gender: String;
   birthday: {
-    year: Number,
-    date: Number
+    year: Number;
+    date: Number;
+  };
+  stage: String;
+  favoTech: String;
+  meta: Meta;
+}
+
+const ListSchema: Schema = new Schema({
+  // uid: ObjectId,
+  uid: { type: Number, default: 0 },
+  name: { type: String, isrequired: true },
+  age: { type: Number, isrequired: true },
+  gender: { type: String, default: "male" },
+  birthday: {
+    year: { type: Number, default: 2020 },
+    date: { type: Number, default: 8.26 }
   },
-  stage: String,
-  favoTech: String,
+  stage: { type: String, default: "default" },
+  favoTech: { type: String, default: "react" },
   meta: {
     createdAt: {
       type: Date,
@@ -26,8 +47,7 @@ const ListSchema = new Schema({
   }
 });
 
-export const List = mongoose.model("List", ListSchema);
-
+export const List: Model<UserDoc> = mongoose.model("List", ListSchema);
 // const group = [];
 
 // for (let i = 0; i < 15; i++) {
