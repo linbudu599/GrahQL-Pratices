@@ -16,17 +16,153 @@
 
 ## 简单使用
 
-### 基本类型
+### 类型系统
 
-- String
-- Int
-- Float
-- Boolean
-- ID
-- 数组，如[String]即为由字符串组成的数组
+- GraphQLSchema
+  用于创建一个 `schema`，服务器会根据它进行验证并查询，如：
 
-### 参数传递
+  ```typescipt
+  app.use(
+    mount(
+      "/demo",
+      graphqlHTTP({
+        schema: new GraphQLSchema({ query: RootQuery, mutation: Mutation });,
+        graphiql: true
+      })
+    )
+  );
+  ```
 
-在小括号内定义形参，参数同样需要定义类型，`!` 表示参数不能为空
+- GraphQLScalarType,
+  
+- GraphQLObjectType,
+  定义查询对象或是操作对象，包含`name` `description` `fields` 等字段
 
-### 待完善整理
+  ```typescript
+  const RootQuery: GraphQLObjectType = new GraphQLObjectType({
+    name: "root",
+    description: "Root Query",
+    fields: {
+      user: {
+        type: new GraphQLList(UserType),
+        args: { gender: { type: GraphQLString } },
+        // 定义处理器，在这里进行数据库查询等操作，决定返回给GraphQL查询的数据
+        resolve: async (parentValue, { gender }) => {
+          const res = await List.find({ gender: "male" });
+          return res;
+        }
+      }
+    }
+  });
+  ```
+
+- GraphQLInterfaceType,
+  接口类型，类似于ts
+
+  ```typescript
+  interface Character {
+    id: ID!
+    name: String!
+    friends: [Character]
+    appearsIn: [Episode]!
+  }
+  // 实现这个接口
+  type Human implements Character {
+    id: ID!
+    name: String!
+    friends: [Character]
+    appearsIn: [Episode]!
+    starships: [Starship]
+    totalCredits: Int
+  }
+  ```
+
+- GraphQLUnionType,
+  联合类型，同样类似于ts，但是其成员需要是具体的对象类型（`GraphQLObjectType`）
+
+  ```javascript
+  union SearchResult = Human | Droid | Starship
+  // 如果需要查询一个返回 SearchResult 联合类型的字段，那么得使用条件片段才能查询任意字段。
+  {
+    search(text: "an") {
+      ... on Human {
+        name
+        height
+      }
+      ... on Droid {
+        name
+        primaryFunction
+      }
+      ... on Starship {
+        name
+        length
+      }
+    }
+  }
+  ```
+
+- [GraphQLEnumType](https://graphql.org.cn/learn/schema-enumeration-types.html)
+- GraphQLInputObjectType
+  （用于约束）传递复杂对象，而不是仅传入基本标量
+  
+  ```javascript
+    const GeoPoint = new GraphQLInputObjectType({
+    name: 'GeoPoint',
+    fields: {
+      lat: { type: new GraphQLNonNull(GraphQLFloat) },
+      lon: { type: new GraphQLNonNull(GraphQLFloat) },
+      alt: { type: GraphQLFloat, defaultValue: 0 },
+    }
+  });
+
+  // ...
+  // args:{someArgu:{ type: GeoPoint}}
+  ```
+
+- GraphQLList、GraphQLNonNull
+  数组类型，如用于告知返回值是数组类型
+
+  ```javascript
+    const RootQuery: GraphQLObjectType = new GraphQLObjectType({
+    fields: {
+      user: {
+        type: new GraphQLList(UserType),
+        // ...
+      }
+    }
+  });
+  ```
+
+  [String!]：数组本身可以为空，但不能有空值成员（null）  
+  [String]!：数组本身不能为空，但可以有空值成员
+
+#### Standard GraphQL Scalars
+
+- GraphQLInt
+- GraphQLFloat
+- GraphQLString
+- GraphQLBoolean
+- GraphQLID  
+  ID 标量类型表示一个唯一标识符，通常用以重新获取对象或者作为缓存中的键。ID 类型使用和 String 一样的方式序列化；然而将其定义为 ID 意味着并不需要人类可读型。
+
+### 客户端发起GraphQL请求
+
+POSTMAN已经支持发起graphql请求
+
+你可以使用axios来向graphQL服务器发起一个请求，如
+
+```javascript
+
+const query = `
+  {
+    hello(user:5){
+      name
+      age
+    }
+  }
+`
+
+axios.post(url,{ query });
+```
+
+### Apollo & Koa & React
