@@ -57,7 +57,7 @@
   ```
 
 - GraphQLInterfaceType,
-  接口类型，类似于ts
+  接口类型，类似于ts，但二者会冲突？
 
   ```typescript
   interface Character {
@@ -165,4 +165,21 @@ const query = `
 axios.post(url,{ query });
 ```
 
+### 进行CURD
+
+- 注意，REST写多了可能一时转不过来，GraphQL应当只有一个URL，所有操作都通过这个URL去完成。
+- 目前的写法：已经支持基础CRUD，在根操作节点的域中进行分解变更请求，在根查询节点进行按需请求,客户端发起请求的方式暂不确定。
+  - 直接拼接字符串并向GraphQL服务器发送POST请求似乎不太优雅，尤其是如果写入数据时过于庞大可能会影响性能。
+  - 研究在不使用Apollo的情况下发送GraphQL风格请求
+
+- 待完成的几个问题：
+  - 多参数&动态参数
+  - 指令
+  - 条件查询
+  - 输入类型（`GraphQLInputObjectType`）
+
+- 虽然上了Apollo-React可能问题就迎刃而解，但还是先好好研究下基础吧。
+
 ### Apollo & Koa & React
+
+待实践

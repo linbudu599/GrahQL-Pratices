@@ -1,8 +1,5 @@
 import mongoose, { Schema, Model, Document } from "mongoose";
-import connect from "./connect";
 const ObjectId = Schema.Types.ObjectId;
-
-// connect();
 
 interface Meta {
   createdAt: Date;
@@ -24,7 +21,6 @@ export interface UserDoc extends Document {
 }
 
 const ListSchema: Schema = new Schema({
-  // uid: ObjectId,
   uid: { type: Number, default: 0 },
   name: { type: String, isrequired: true },
   age: { type: Number, isrequired: true },
