@@ -10,12 +10,20 @@ import {
   GraphQLFloat,
   GraphQLNonNull,
   GraphQLInputObjectType,
-  GraphQLInputType
+  GraphQLInputType,
+  GraphQLInterfaceType
 } from "graphql";
 import mongoose from "mongoose";
 import { List } from "../model/list";
 
-const BirthdayType: GraphQLObjectType = new GraphQLObjectType({
+// const NameType = new GraphQLInterfaceType({
+//   name: "userName",
+//   fields: {
+//     name: { type: GraphQLString }
+//   }
+// });
+
+const BirthdayType = new GraphQLObjectType({
   name: "Birthday",
   description: "Birthday",
   fields: () => ({
@@ -24,37 +32,40 @@ const BirthdayType: GraphQLObjectType = new GraphQLObjectType({
   })
 });
 
-const UserType: GraphQLObjectType = new GraphQLObjectType({
+const UserType = new GraphQLObjectType({
   name: "User",
   description: "Test User",
   fields: () => ({
     name: { type: GraphQLString },
     age: { type: GraphQLInt },
     gender: { type: GraphQLString },
-    birthday: { type: BirthdayType },
-    status: { type: GraphQLString }
+    birthday: { type: BirthdayType }
   })
 });
 
-const RootQuery: GraphQLObjectType = new GraphQLObjectType({
+const UserInput = new GraphQLInputObjectType({
+  name: "userInput",
+  fields: {
+    gender: { type: new GraphQLNonNull(GraphQLString) },
+    age: { type: new GraphQLNonNull(GraphQLInt) }
+  }
+});
+
+const RootQuery = new GraphQLObjectType({
   name: "root",
   description: "Root Query",
   fields: {
+    // TODO:根据传入参数个数动态变化
     getByParams: {
       type: new GraphQLList(UserType),
-      args: { gender: { type: GraphQLString }, age: { type: GraphQLInt } },
-      resolve: async (parentValue, { gender, age }) => {
+      // args: { gender: { type: GraphQLString }, age: { type: GraphQLInt } },
+      args: {
+        genderAndAge: {
+          type: new GraphQLNonNull(UserInput)
+        }
+      },
+      resolve: async (parentValue, { genderAndAge: { gender, age } }) => {
         console.log(gender, age);
-        // 处理掉没有传入的参数
-        let search_params = {};
-        if (!gender) {
-          console.log("1");
-          Object.assign({}, search_params, { gender });
-        }
-        if (!age) {
-          Object.assign({}, search_params, { age });
-        }
-        console.log(search_params);
         const res = await List.find({ gender, age });
         return res;
       }
@@ -67,15 +78,6 @@ const RootQuery: GraphQLObjectType = new GraphQLObjectType({
         return res;
       }
     }
-  }
-});
-
-const UserInput: GraphQLInputObjectType = new GraphQLInputObjectType({
-  name: "User Input",
-  fields: {
-    name: { type: new GraphQLNonNull(GraphQLString) },
-    age: { type: new GraphQLNonNull(GraphQLInt) },
-    status: { type: new GraphQLNonNull(GraphQLString) }
   }
 });
 

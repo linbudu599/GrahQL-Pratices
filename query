@@ -1,0 +1,10 @@
+__schema {
+  mutationType {
+    name
+    description
+  }
+  queryType {
+    name
+    description
+  }
+}

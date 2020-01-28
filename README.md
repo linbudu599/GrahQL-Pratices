@@ -5,7 +5,7 @@
 ## TODO
 
 - [ ] 一个基于 GraphQL 的 Web App
-- [ ] 重构自用API，支持 RESTFul 与 GraphQL
+- [ ] 重构自用 API，支持 RESTFul 与 GraphQL
 
 ## 介绍
 
@@ -34,7 +34,7 @@
   ```
 
 - GraphQLScalarType,
-  
+
 - GraphQLObjectType,
   定义查询对象或是操作对象，包含`name` `description` `fields` 等字段
 
@@ -57,7 +57,7 @@
   ```
 
 - GraphQLInterfaceType,
-  接口类型，类似于ts，但二者会冲突？
+  接口类型，类似于 ts，但二者会冲突？
 
   ```typescript
   interface Character {
@@ -78,7 +78,7 @@
   ```
 
 - GraphQLUnionType,
-  联合类型，同样类似于ts，但是其成员需要是具体的对象类型（`GraphQLObjectType`）
+  联合类型，同样类似于 ts，但是其成员需要是具体的对象类型（`GraphQLObjectType`）
 
   ```javascript
   union SearchResult = Human | Droid | Starship
@@ -104,14 +104,14 @@
 - [GraphQLEnumType](https://graphql.org.cn/learn/schema-enumeration-types.html)
 - GraphQLInputObjectType
   （用于约束）传递复杂对象，而不是仅传入基本标量
-  
+
   ```javascript
-    const GeoPoint = new GraphQLInputObjectType({
-    name: 'GeoPoint',
+  const GeoPoint = new GraphQLInputObjectType({
+    name: "GeoPoint",
     fields: {
       lat: { type: new GraphQLNonNull(GraphQLFloat) },
       lon: { type: new GraphQLNonNull(GraphQLFloat) },
-      alt: { type: GraphQLFloat, defaultValue: 0 },
+      alt: { type: GraphQLFloat, defaultValue: 0 }
     }
   });
 
@@ -123,10 +123,10 @@
   数组类型，如用于告知返回值是数组类型
 
   ```javascript
-    const RootQuery: GraphQLObjectType = new GraphQLObjectType({
+  const RootQuery: GraphQLObjectType = new GraphQLObjectType({
     fields: {
       user: {
-        type: new GraphQLList(UserType),
+        type: new GraphQLList(UserType)
         // ...
       }
     }
@@ -145,14 +145,89 @@
 - GraphQLID  
   ID 标量类型表示一个唯一标识符，通常用以重新获取对象或者作为缓存中的键。ID 类型使用和 String 一样的方式序列化；然而将其定义为 ID 意味着并不需要人类可读型。
 
-### 客户端发起GraphQL请求
+### 别名&片段&指令
 
-POSTMAN已经支持发起graphql请求
+```GraphQL
+{
+  get: getByParams(gender: "male", age: 4) {
+    ...nameField
+    birthday {
+      year
+      date
+    }
+    # 内联片段
+    ... on User {
+      name
+    }
+  }
+}
+# 可以使用使用原生的GraphQL，配合模板字符串进行拼接
+fragment nameField on User {
+  name
+  age
+}
 
-你可以使用axios来向graphQL服务器发起一个请求，如
+```
+
+#### 内联片段
+
+```graphQL
+# root 返回Parent类型，其被ChildA与ChildB实现
+# 即有可能返回ChildA也有可能是B，取决于argus参数
+query root($argus: Type!) {
+  (argu: $argus) {
+    ... on ChildA {
+      ChildAPrivateProps
+    }
+    ... on ChildB {
+      ChildBPrivateProps
+    }
+  }
+}
+# 或者是在返回的是有多种可能的联合类型时
+{
+  search(text: "an") {
+    __typename
+    ... on Human {
+      name
+    }
+    ... on Droid {
+      name
+    }
+    ... on Starship {
+      name
+    }
+  }
+}
+```
+
+在直接请求的情况下，只能请求 Parent 类型上存在的（即 A、B 都具有的公共属性），
+而使用内联片段，只有在返回的是 ChildA 类型才会返回其私有属性，ChildB 同理
+
+### 元字段
+
+在不知道服务器将会返回何种类型数据时，可以使用元字段`__typename`来获取任意位置的对象类型名称
+
+```graphql
+{
+  getByParams(genderAndAge: { gender: "male", age: 4 }) {
+    age
+    __typename
+    birthday {
+      year
+      date
+    }
+  }
+}
+```
+
+### 客户端发起 GraphQL 请求
+
+POSTMAN 已经支持发起 graphql 请求
+
+你可以使用 axios 来向 graphQL 服务器发起一个请求，如
 
 ```javascript
-
 const query = `
   {
     hello(user:5){
@@ -160,25 +235,27 @@ const query = `
       age
     }
   }
-`
+`;
 
-axios.post(url,{ query });
+axios.post(url, { query });
 ```
 
-### 进行CURD
+### 进行 CURD
 
-- 注意，REST写多了可能一时转不过来，GraphQL应当只有一个URL，所有操作都通过这个URL去完成。
-- 目前的写法：已经支持基础CRUD，在根操作节点的域中进行分解变更请求，在根查询节点进行按需请求,客户端发起请求的方式暂不确定。
-  - 直接拼接字符串并向GraphQL服务器发送POST请求似乎不太优雅，尤其是如果写入数据时过于庞大可能会影响性能。
-  - 研究在不使用Apollo的情况下发送GraphQL风格请求
+- 注意，REST 写多了可能一时转不过来，GraphQL 应当只有一个 URL，所有操作都通过这个 URL 去完成。
+- 目前的写法：已经支持基础 CRUD，在根操作节点的域中进行分解变更请求，在根查询节点进行按需请求,客户端发起请求的方式暂不确定。
+
+  - 直接拼接字符串并向 GraphQL 服务器发送 POST 请求似乎不太优雅，尤其是如果写入数据时过于庞大可能会影响性能。
+  - 研究在不使用 Apollo 的情况下发送 GraphQL 风格请求
 
 - 待完成的几个问题：
+
   - 多参数&动态参数
   - 指令
   - 条件查询
   - 输入类型（`GraphQLInputObjectType`）
 
-- 虽然上了Apollo-React可能问题就迎刃而解，但还是先好好研究下基础吧。
+- 虽然上了 Apollo-React 可能问题就迎刃而解，但还是先好好研究下基础吧。
 
 ### Apollo & Koa & React
 
