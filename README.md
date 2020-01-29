@@ -161,7 +161,7 @@
     }
   }
 }
-# 可以使用使用原生的GraphQL，配合模板字符串进行拼接
+# 可以使用使用原生的GraphQL语句，配合模板字符串进行拼接
 fragment nameField on User {
   name
   age

@@ -13,15 +13,8 @@ import {
   GraphQLInputType,
   GraphQLInterfaceType
 } from "graphql";
-import mongoose from "mongoose";
+import { readAll, createOne, updateOne, deleteOne } from "../controllers/list";
 import { List } from "../model/list";
-
-// const NameType = new GraphQLInterfaceType({
-//   name: "userName",
-//   fields: {
-//     name: { type: GraphQLString }
-//   }
-// });
 
 const BirthdayType = new GraphQLObjectType({
   name: "Birthday",
@@ -39,7 +32,8 @@ const UserType = new GraphQLObjectType({
     name: { type: GraphQLString },
     age: { type: GraphQLInt },
     gender: { type: GraphQLString },
-    birthday: { type: BirthdayType }
+    birthday: { type: BirthdayType },
+    status: { type: GraphQLString }
   })
 });
 
@@ -74,10 +68,28 @@ const RootQuery = new GraphQLObjectType({
       type: new GraphQLList(UserType),
       args: {},
       resolve: async () => {
-        const res = await List.find();
-        return res;
+        return readAll();
       }
     }
+  }
+});
+
+// 进行更新时需要传入两组输入对象类型参数，
+// 一组用于找到目标，这里暂时只用name和age定位
+// 一组用于更新目标，这里暂时只有name和age是必填的
+const FindBy = new GraphQLInputObjectType({
+  name: "findBeforeUpdate",
+  fields: {
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    age: { type: new GraphQLNonNull(GraphQLInt) }
+  }
+});
+
+const NewInfo = new GraphQLInputObjectType({
+  name: "infoToBeUpdated",
+  fields: {
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    age: { type: new GraphQLNonNull(GraphQLInt) }
   }
 });
 
@@ -92,25 +104,22 @@ const Mutation: GraphQLObjectType = new GraphQLObjectType({
         age: { type: GraphQLInt }
       },
       resolve: async (parentValue, { name, age }) => {
-        const newUser = new List({
-          name,
-          age
-        });
-        const res = await newUser.save();
-        return res;
+        return createOne(name, age);
       }
     },
     // 根据第一组参数获取到一个结果，并根据第二组参数进行更新
     updateUser: {
       type: UserType,
       args: {
-        name: { type: GraphQLString },
-        age: { type: GraphQLInt }
+        findBy: {
+          type: new GraphQLNonNull(FindBy)
+        },
+        newInfo: {
+          type: new GraphQLNonNull(NewInfo)
+        }
       },
-      resolve: async (parentValue, { name, age }) => {
-        // const res = await List.findOneAndUpdate({  });
-        // console.log(res);
-        // return res;
+      resolve: async (parentValue, { findBy, newInfo }) => {
+        return updateOne(findBy, newInfo);
       }
     },
     deleteUser: {
@@ -120,9 +129,7 @@ const Mutation: GraphQLObjectType = new GraphQLObjectType({
         age: { type: GraphQLInt }
       },
       resolve: async (parentValue, { name, age }) => {
-        const res = await List.findOneAndRemove({ name, age });
-        console.log(res);
-        return res;
+        return deleteOne(name, age);
       }
     }
   })
