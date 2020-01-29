@@ -38,17 +38,6 @@ app.use(
     })
   )
 );
-// const typeDefs = gql`
-//   type Query {
-//     hello: String
-//   }
-// `;
-
-// const resolvers = {
-//   Query: {
-//     hello: () => "Hello Koa & GraphQL!"
-//   }
-// };
 
 // const server = new ApolloServer({ typeDefs, resolvers });
 // server.applyMiddleware({ app });

@@ -204,6 +204,22 @@ query root($argus: Type!) {
 在直接请求的情况下，只能请求 Parent 类型上存在的（即 A、B 都具有的公共属性），
 而使用内联片段，只有在返回的是 ChildA 类型才会返回其私有属性，ChildB 同理
 
+### 动态参数！
+
+```graphql
+# { "graphiql": true, "variables": { "episode": "JEDI" } }
+query HeroNameAndFriends($episode: Episode) {
+  hero(episode: $episode) {
+    name
+    friends {
+      name
+    }
+  }
+}
+```
+
+`GraphiQL` 中好像不能使用？但是明明有专门的 query var 窗口
+
 ### 元字段
 
 在不知道服务器将会返回何种类型数据时，可以使用元字段`__typename`来获取任意位置的对象类型名称
@@ -250,13 +266,12 @@ axios.post(url, { query });
 
 - 待完成的几个问题：
 
-  - 多参数&动态参数
+  - 嵌套查询
   - 指令
   - 条件查询
-  - 输入类型（`GraphQLInputObjectType`）
 
 - 虽然上了 Apollo-React 可能问题就迎刃而解，但还是先好好研究下基础吧。
 
 ### Apollo & Koa & React
 
-待实践
+- Apollo不仅帮助客户端进行了数据流管理，也为服务端提供了方案。
