@@ -4,7 +4,7 @@
 
 ## TODO
 
-- [ ] 一个基于 GraphQL 的 Web App
+- [x] 一个基于 GraphQL 的 Web App，[Apollo-WebApp-Server](https://github.com/linbudu599/Apollo-Tutorial-App-ServerSide), [Apollo-WebApp-Client](https://github.com/linbudu599/Apollo-Tutorial-App-Client)
 - [ ] 重构自用 API，支持 RESTFul 与 GraphQL
 
 ## 介绍
@@ -32,8 +32,6 @@
     )
   );
   ```
-
-- GraphQLScalarType,
 
 - GraphQLObjectType,
   定义查询对象或是操作对象，包含`name` `description` `fields` 等字段
@@ -147,7 +145,7 @@
 
 ### 别名&片段&指令
 
-```GraphQL
+```js
 {
   get: getByParams(gender: "male", age: 4) {
     ...nameField
@@ -218,8 +216,6 @@ query HeroNameAndFriends($episode: Episode) {
 }
 ```
 
-`GraphiQL` 中好像不能使用？但是明明有专门的 query var 窗口
-
 ### 元字段
 
 在不知道服务器将会返回何种类型数据时，可以使用元字段`__typename`来获取任意位置的对象类型名称
@@ -262,16 +258,14 @@ axios.post(url, { query });
 - 目前的写法：已经支持基础 CRUD，在根操作节点的域中进行分解变更请求，在根查询节点进行按需请求,客户端发起请求的方式暂不确定。
 
   - 直接拼接字符串并向 GraphQL 服务器发送 POST 请求似乎不太优雅，尤其是如果写入数据时过于庞大可能会影响性能。
-  - 研究在不使用 Apollo 的情况下发送 GraphQL 风格请求
+  - [x] 研究在不使用 Apollo 的情况下发送 GraphQL 风格请求
 
-- 待完成的几个问题：
+## Apollo & Koa & React
 
-  - 嵌套查询
-  - 指令
-  - 条件查询
+- Apollo-Server中推荐的处理方式是拆分`schema`与`resolver`，在`Apollo-Server`中可以很容易的将`REST`接口和数据库连接到GraphQL服务。
 
-- 虽然上了 Apollo-React 可能问题就迎刃而解，但还是先好好研究下基础吧。
+- [基于 Apollo-Server 的demo](https://github.com/linbudu599/Apollo-Tutorial-App-ServerSide)。
 
-### Apollo & Koa & React
+- [Apollo-Server-Koa](https://github.com/apollographql/apollo-server/tree/master/packages/apollo-server-koa)实际上只是在`Apollo-Server-Core`的基础上针对Koa的特性做了封装，实际的API使用接近相同哈。
 
-- Apollo不仅帮助客户端进行了数据流管理，也为服务端提供了方案。
+- [基于React-Apollo的demo](https://github.com/linbudu599/Apollo-Tutorial-App-Client)，实际上我觉得 `Apollo-Client` 和 `React` 最搭配，毕竟有 [@apollo/react-hooks](https://www.apollographql.com/docs/react/api/react-hooks/)提供的 `useQuery` 和 `useMutation`，基本是零成本迁移吧。还有 `@apollo/react-testing`、 `@apollo/react-ssr`等工具。

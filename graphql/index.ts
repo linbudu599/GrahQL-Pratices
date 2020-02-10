@@ -15,10 +15,10 @@ import {
   findOne
 } from "../controllers/list";
 
-import { UserType } from "../graphql/types";
-import { UserInput, FindBy } from "../graphql/types/input";
+import { UserType } from "./types";
+import { UserInput, FindBy, NewInfo } from "./types/input";
 
-const RootQuery = new GraphQLObjectType({
+export const RootQuery = new GraphQLObjectType({
   name: "root",
   description: "Root Query",
   fields: {
@@ -42,15 +42,7 @@ const RootQuery = new GraphQLObjectType({
   }
 });
 
-const NewInfo = new GraphQLInputObjectType({
-  name: "infoToBeUpdated",
-  fields: {
-    name: { type: new GraphQLNonNull(GraphQLString) },
-    age: { type: new GraphQLNonNull(GraphQLInt) }
-  }
-});
-
-const Mutation: GraphQLObjectType = new GraphQLObjectType({
+export const Mutation: GraphQLObjectType = new GraphQLObjectType({
   name: "RootMutation",
   description: "Root Mutation",
   fields: () => ({

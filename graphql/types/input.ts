@@ -12,6 +12,15 @@ export const UserInput = new GraphQLInputObjectType({
     age: { type: new GraphQLNonNull(GraphQLInt) }
   }
 });
+
+export const NewInfo = new GraphQLInputObjectType({
+  name: "infoToBeUpdated",
+  fields: {
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    age: { type: new GraphQLNonNull(GraphQLInt) }
+  }
+});
+
 // 进行更新时需要传入两组输入对象类型参数，
 // 一组用于找到目标，这里暂时只用name和age定位
 // 一组用于更新目标，这里暂时只有name和age是必填的
